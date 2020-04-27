@@ -13,20 +13,16 @@ You also need `curl`.
 
 ## Instructions: (READ FULLY BEFORE FOLLOWING)
 
-1. Install necessary dependcies listed using guide above. Don't forget that optional deps will bring fast downloads.
+1. Install necessary dependcies listed using guide above. 
 2. Use install script to obtain WB
-3. Move Brawl into FasterProjectPlus/bin/Games directory
-4. Run the game by opening the .elf file in dolphin
+3. In the client, change the Default ISO to your Brawl ISO, and Game Folders to the correct 'Launcher' folder.
+
 
 ## To use:
 
 ```sh
 sh -c "$(curl -Ls https://github.com/Koopabro/Wagabuild-Installer/raw/master/setup)"
 ```
-
-If a different version is needed (e.g. not SL default), edit the script and replace the desired variables.
-
-Packed config structure: main folder named `Binaries/`, with  `User/`, `Sys/`, `portable.txt`, and `version-####.txt`(optional) packed inside.
 
 ## Changelog
 v1.0 initial release
