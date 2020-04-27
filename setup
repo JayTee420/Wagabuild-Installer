@@ -10,7 +10,7 @@ set -e
 if [ -f "./setup" ] && [ -z "${IN_NIX_SHELL++}" ]; then
 	echo "You are running a hosted copy of the script. Please *delete the local file 'setup'* and run"
 	echo ""
-	echo "sh -c \"\$(curl -Ls https://github.com/Birdthulu/FPM-Installer/raw/master/setup)"
+	echo "sh -c \"\$(curl -Ls https://raw.githubusercontent.com/Koopabro/Wagabuild-Installer/master/setup)"
 	echo ""
 	echo "to ensure you have the latest version!"
 	exit
@@ -29,16 +29,17 @@ CPUS=$(getconf _NPROCESSORS_ONLN 2>/dev/null)
 # ---
 
 # --- define custom config links here!
-FPPVERSION="" # name of FPP version, used in folder name
-COMMITHASH="" # full commit hash 
-GITCLONELINK="" # Version of Ishiiruka
-CONFIGLINK="" # Packed configs, can be found under config/ or config/legacy/
+WBVERSION="deluxe"
+CONFIGNAME="wagabuild"
+COMMITHASH="e07b514b6244913dbe14aa6949ff68f5775bfa4a"
+CONFIGLINK="https://github.com/Koopabro/Wagabuild-Installer/raw/master/config/$WBVERSION-$CONFIGNAME.tar.gz"
+GITCLONELINK="https://github.com/dolphin-emu/dolphin"
 # ---
 
-# --- delete all "FasterProjectPlus" folders filled with incomplete installations
+# --- delete all "Wagabuild" folders filled with incomplete installations
 echo ""
-echo "Attempting to delete incomplete installations of FPP..."
-for f in FasterProjectPlus*; do
+echo "Attempting to delete incomplete installations of the Wagabuild..."
+for f in wagabuild*; do
 	if [ -d "${f}" ] && [ ! -d "$f/bin" ]; then
 		echo "Found incomplete installation at $f/, deleting."
 		rm -rf "$f" # is incomplete if bin/ doesn't exist
@@ -46,7 +47,7 @@ for f in FasterProjectPlus*; do
 done
 # ---
 
-# --- ask if you want to delete all remaining FPP* folders
+# --- ask if you want to delete all remaining WB* folders
 echo ""
 echo "Would you like to overwrite ALL of your previous installations? (y/N)"
 read -r RESP
@@ -54,47 +55,23 @@ if [ "$RESP" = "y" ] || [ "$RESP" = "Y" ]; then
 	echo "Are you sure? This action is not reversible! (y/N)"
 	read -r RESP
 	if [ "$RESP" = "y" ] || [ "$RESP" = "Y" ] ; then
-		rm -rf FasterProjectPlus*/
-		echo "Deleted all FPP folders!"
+		rm -rf wagabuild*/
+		echo "Deleted all wb folders!"
 	fi
 else
 	echo "No changes made!"
 fi
 # ---
-
-# --- if custom links aren't defined, prompt to choose a version
-if [ -z "$FPPVERSION" ] || [ -z "$COMMITHASH" ] || [ -z "$GITCLONELINK" ] || [ -z "$CONFIGLINK" ]; then #ORs used to ensure everything filled out
 	echo ""
-	echo "Which version of Faster Project Plus would you like to install? (default: 1)"
-	echo "1.) 2.1.1 (Latest version)"
-	echo "2.) 2.0"
-	read -r RESP
-	if [ "$RESP" -eq 2 ] 2> /dev/null; then
-	 	FPPVERSION="2.0"
-		CONFIGNAME="fppconfig"
-		COMMITHASH="a667c245df18678b5060b3807e1c3238536c0ef1"
-		CONFIGLINK="https://github.com/Birdthulu/FPM-Installer/raw/master/config/legacy/$FPPVERSION-$CONFIGNAME.tar.gz"
-		GITCLONELINK="https://github.com/Birdthulu/Ishiiruka"
-	else
-		FPPVERSION="2.1.1"
-		CONFIGNAME="fppconfig"
-		COMMITHASH="9054c90d9170f47a707933eac8cf0d67d553e951"
-		CONFIGLINK="https://github.com/Birdthulu/FPM-Installer/raw/master/config/$FPPVERSION-$CONFIGNAME.tar.gz"
-		GITCLONELINK="https://github.com/Birdthulu/Ishiiruka"
-	fi
-	echo "Installing version $FPPVERSION!"
-else
-	echo ""
-	echo "Attempting to install version $FPPVERSION!"
-fi
+	echo "Loading config files Wagabuild - $WBVERSION!"
 
-# Set FOLDERNAME based on FPP version
-FOLDERNAME="FasterProjectPlus-${FPPVERSION}"
+# Set FOLDERNAME based on WB version
+FOLDERNAME="wagabuild-${WBVERSION}"
 
 # --- check for previously installed version, ask if overwrite is wanted
 if [ -d "$FOLDERNAME" ]; then
 	echo "
-	FPP Folder with same version found! Would you like to overwrite? (y/N)"
+	wb Folder with same version found! Would you like to overwrite? (y/N)"
 	read -r RESP
 	if [ "$RESP" = "y" ] || [ "$RESP" = "Y" ]; then
 		echo "Are you sure? This action is not reversible! (y/N)"
@@ -168,8 +145,8 @@ mkdir "$FOLDERNAME" && cd "$FOLDERNAME"
 echo "Downloading config files..."
 curl -LO# $CONFIGLINK
 echo "Extracting config files..."
-tar -xzf "$FPPVERSION-$CONFIGNAME.tar.gz" --checkpoint-action='exec=printf "%d/410 records extracted.\r" $TAR_CHECKPOINT' --totals
-rm "$FPPVERSION-$CONFIGNAME.tar.gz"
+tar -xzf "$WBVERSION-$CONFIGNAME.tar.gz" --checkpoint-action='exec=printf "%d/410 records extracted.\r" $TAR_CHECKPOINT' --totals
+rm "$WBVERSION-$CONFIGNAME.tar.gz"
 echo ""
 echo "Downloading tarball..."
 curl -LO# "$GITCLONELINK/archive/$COMMITHASH.tar.gz"
@@ -177,21 +154,20 @@ echo "Extracting tarball..."
 tar -xzf "$COMMITHASH.tar.gz" --checkpoint-action='exec=printf "%d/12130 records extracted.\r" $TAR_CHECKPOINT' --totals
 rm "$COMMITHASH.tar.gz"
 echo "" #spacing
-mv "Ishiiruka-$COMMITHASH" Ishiiruka
-cd Ishiiruka
+mv "dolphin-$COMMITHASH" dolphin
+cd dolphin
 
 # --- Patch tarball to display correct hash to other netplay clients
 echo "Patching tarball..."
 sed -i "s|\${GIT_EXECUTABLE} rev-parse HEAD|echo ${COMMITHASH}|g" CMakeLists.txt  # --set scm_rev_str everywhere to actual commit hash when downloaded
-sed -i "s|\${GIT_EXECUTABLE} describe --always --long --dirty|echo FM v$FPPVERSION|g" CMakeLists.txt # ensures compatibility w/ netplay
-sed -i "s|\${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD|echo HEAD|g" CMakeLists.txt
+sed -i "s|\${GIT_EXECUTABLE} describe --always --long --dirty|echo Wagabuild $WBVERSION|g" CMakeLists.txt # ensures compatibility w/ netplay
+sed -i "s|\${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD|echo Koopa|g" CMakeLists.txt
 # ---
 
 # --- move necessary config files into the build folder
-echo "Adding FPP config files..."
+echo "Adding WB config files..."
 mkdir build && cd build
 mv ../../Binaries .
-mv ../Data/ishiiruka.png Binaries/
 # ---
 
 # --- cmake and compile
@@ -208,35 +184,23 @@ make -j $CPUS -s
 # --- Download the sd card tarball, extract it, move it to proper folder, and delete tarball
 # credit to https://superuser.com/a/1517096 superuser.com user Zibri
 echo "Downloading sd card"
-SdCardFileName="ProjectPlusSdCard.tar.gz"
-SdCardDlHash="7f7q8a6m8plyq16"
-SdCardLink="http://www.mediafire.com/file/$SdCardDlHash/$SdCardFileName/file"
-url=$(curl -Lqs0 "$SdCardLink" | grep "href.*download.*media.*"| grep "$SdCardFileName" | cut -d '"' -f 2)
+echo "Downloading from StackStorage";
+ curl --header "Host: ufopiloot.stackstorage.com" --user-agent "Mozilla/5.0 (X11; Linux x86_64; rv:75.0) Gecko/20100101 Firefox/75.0" --header "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8" --header "Accept-Language: en-US,en;q=0.5" --header "Content-Type: application/x-www-form-urlencoded" --header "Origin: https://ufopiloot.stackstorage.com" --referer "https://ufopiloot.stackstorage.com/s/fUqTDzu15KRXNrz" --cookie "stackShareSession=j8eVdF8-zHsL71TGQt88lGk-Uqw" --header "Upgrade-Insecure-Requests: 1" --request POST --data-urlencode "archive=zip" --data-urlencode "all=false" --data-urlencode "CSRF-Token=HJFPMfKTRGh3iRXBDcjZvQ" --data-urlencode "paths%5B%5D=/" "https://ufopiloot.stackstorage.com/public-share/fUqTDzu15KRXNrz/download/" --output "NepPlaySd.tar.gz"
 
-echo "Attempting with Axel";
-if [ -x "$(command -v axel)" ]; then
-	axel "$url" -a -n $CPUS; 
-elif [ -x "$(command -v aria2c)" ]; then
-	echo "Axel command failed, dependency may be missing, attempting with aria2";
-	aria2c -x$CPUS "$url"
-else
- echo "Axel and Aria2 command failed, dependency may be missing, reverting to slowest way possible";
- wget "$url"
-fi
 
 echo "Extracting sd card"
-tar -xzf "ProjectPlusSdCard.tar.gz" --checkpoint-action='exec=printf "%d/12130 records extracted.\r" $TAR_CHECKPOINT' --totals
-mv "sd.raw" "Binaries/User/Wii/sd.raw"
-rm "ProjectPlusSdCard.tar.gz"
+tar -xzf "NepPlaySd.tar.gz" --checkpoint-action='exec=printf "%d/12130 records extracted.\r" $TAR_CHECKPOINT' --totals
+mv "nepplay.raw" "Binaries/User/Wii/nepplay.raw"
+rm "NepPlaySd.tar.gz"
 # ---
 
 # --- Delete created files and old symlinks, isolate Binaries to their own folder
 echo "Cleaning up..."
 cd ../..
-mv Ishiiruka/build/Binaries/ bin/
-rm -rf Ishiiruka # -f required to remove git history
-rm -f ../launch-faster-project-plus # -f required if shortcuts do not exist
-rm -f ../launch-fpp
+mv dolphin/build/Binaries/ bin/
+rm -rf dolphin # -f required to remove git history
+rm -f ../launch-wagabuild # -f required if shortcuts do not exist
+rm -f ../launch-wb
 # ---
 
 # --- Get Main path and Set Up path variables for config/Dolphin.ini 
@@ -244,7 +208,7 @@ echo "Setting config paths"
 MainDir=$(pwd)"/bin"
 LauncherDir=$MainDir"/Launcher"
 GamesDir=$MainDir"/Games"
-SDPath=$MainDir"/User/Wii/sd.raw"
+SDPath=$MainDir"/User/Wii/nepplay.raw"
 IsoPath=$GamesDir"/RSBE01.iso"
 ConfigPath=$MainDir"/User/Config/Dolphin.ini"
 # ---
@@ -258,25 +222,25 @@ sed -i -e "s|ISODirPath|${IsoPath}|" $ConfigPath
 
 # --- create symlink to newly compiled dolphin-emu. if queued, create shortcut.
 echo "Creating shortcuts..."
-ln -s "$FOLDERNAME/bin/ishiiruka" ../launch-fpp
+ln -s "$FOLDERNAME/bin/dolphin-emu" ../launch-wb
 if [ "$SHORTCUTBOOL" -eq 1 ] && [ -d ~/.local/share/applications ]; then
-	rm -f ~/.local/share/applications/faster-project-plus-$FPPVERSION.desktop # remove old shortcut
-	rm -f ~/Desktop/faster-project-plus-$FPPVERSION.desktop
-	touch ~/.local/share/applications/faster-project-plus-$FPPVERSION.desktop # fixes very rare tee bug?
+	rm -f ~/.local/share/applications/wagabuild-$WBVERSION.desktop # remove old shortcut
+	rm -f ~/Desktop/wagabuild-$WBVERSION.desktop
+	touch ~/.local/share/applications/wagabuild-$WBVERSION.desktop # fixes very rare tee bug?
 	EXEPATH="$(pwd)/bin"
-	FPPNAME="Faster Project Plus $FPPVERSION"
+	wbNAME="Wagabuild $WBVERSION"
 	echo "[Desktop Entry]
 Type=Application
 GenericName=Wii/GameCube Emulator
-Comment=Ishiiruka fork for SSBPM
+Comment=dolphin fork for SSBPM
 Categories=Emulator;Game;
-Icon=$EXEPATH/ishiiruka.png
+Icon=$EXEPATH/dolphin.png
 Keywords=ProjectM;Project M;ProjectPlus;Project Plus;Project+
-Version=$FPPVERSION
-Name=$FPPNAME
-Exec=$EXEPATH/ishiiruka" | tee ~/.local/share/applications/faster-project-plus-$FPPVERSION.desktop > /dev/null
-	cp ~/.local/share/applications/faster-project-plus-$FPPVERSION.desktop ~/Desktop
-	chmod +x ~/Desktop/faster-project-plus-$FPPVERSION.desktop
+Version=$WBVERSION
+Name=$wbNAME
+Exec=$EXEPATH/dolphin-emu" | tee ~/.local/share/applications/wagabuild-$WBVERSION.desktop > /dev/null
+	cp ~/.local/share/applications/wagabuild-$WBVERSION.desktop ~/Desktop
+	chmod +x ~/Desktop/wagabuild-$WBVERSION.desktop
 else
 	echo ".local folder not found, skipping desktop shortcut."
 fi
@@ -284,7 +248,7 @@ fi
 
 echo ""
 echo "***************************************************************************************************"
-echo "Done! Run ./launch-fpp to run the latest installed version!"
+echo "Done! Run ./launch-wb to run the latest installed version!"
 echo "Alternatively, go to Application > Games or your desktop and select the desired version."
 echo "Make sure to unplug and replug your adapter before opening Dolphin if adapter rules were installed!"
 echo "***************************************************************************************************"

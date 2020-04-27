@@ -1,54 +1,27 @@
-# Faster Project Plus Installer for Linux
+# Wagabuild Installer for Linux
 
-A script for compiling Faster Project Plus on Linux. Current Version: **2.1**
+A script for compiling the Wagabuild from Smash @ Wageningen on Linux. 
 
-Currently tested on Ubuntu, but should work across *all* distributions given the right dependencies. Older versions can be found under `config/legacy/`.
+Currently tested on Arch Linux, but should work across *all* distributions given the right dependencies. 
 
-[Join the official Faster Project Plus Discord Channel for support!](https://discord.gg/ZHYxnFp)
+Send a message to Koopa#3701 on Discord for support.
 
 ## Dependencies needed (install these first!)
 For most users (including Fedora 24+), see [this page](https://wiki.dolphin-emu.org/index.php?title=Building_Dolphin_on_Linux) for an easy to install list of dependencies; otherwise, see below.
 
-NixOS: 
-
-See [attached README, written by fletchers#4892](../other_distros/NixOS/INSTALL.md)
-
-Solus (possible list, untested):
-
-`sudo eopkg it -c system.devel`
-
-`sudo eopkg it libgtk-2-devel libgtk-3-devel wxwidgets-devel libsm-devel gtest-devel llvm-devel lzo-devel mbedtls-devel miniupnpc-devel libxrandr-devel libxi-devel alsa-lib-devel bluez-devel mesalib-devel curl-devel enet-devel libevdev-devel pulseaudio-devel libusb-devel openal-soft-devel portaudio-devel sdl2-devel SFML-devel soundtouch-devel git cmake pkg-config gcc readline-devel libxext-devel libao-devel`
-
-## Dependencies Optional
-
-`axel` or `aria2c`
-
-Gives  a fast way to download the SD card. 
-Defaults to wget without them.
-Wget is extremeley slow by comparision.
-
-
-Downloading sd card benchmarks
-
-SD card file size 2Gb zipped to 1.6Gb
-
-| UrlDownloader | Download Time |   |
-|---------------|---------------|---|
-| axel          | 1-2 min(s)    |   |
-| aria2c        | 3-4 mins      |   |
-| wget          | 15-20 mins    |   |
+You also need `curl`.
 
 ## Instructions: (READ FULLY BEFORE FOLLOWING)
 
 1. Install necessary dependcies listed using guide above. Don't forget that optional deps will bring fast downloads.
-2. Use install script to obtain FPP
+2. Use install script to obtain WB
 3. Move Brawl into FasterProjectPlus/bin/Games directory
 4. Run the game by opening the .elf file in dolphin
 
 ## To use:
 
 ```sh
-sh -c "$(curl -Ls https://github.com/Birdthulu/FPM-Installer/raw/master/setup)"
+sh -c "$(curl -Ls https://github.com/Koopabro/Wagabuild-Installer/raw/master/setup)"
 ```
 
 If a different version is needed (e.g. not SL default), edit the script and replace the desired variables.
@@ -56,12 +29,12 @@ If a different version is needed (e.g. not SL default), edit the script and repl
 Packed config structure: main folder named `Binaries/`, with  `User/`, `Sys/`, `portable.txt`, and `version-####.txt`(optional) packed inside.
 
 ## Changelog
-v1.0: Support for versions 2.1 and 2.0.
-v2.0: Downloads the sd card for you.
-v3.0: Renames the config paths for you.
-V3.1: Optional parallel downloads, increases the speed by magnitudes.
+v1.0 initial release
 
 ### Thanks to:
+Odie for maintaining the Smash Wageningen Build. 
+
+The Faster Project Plus guys, this script is shamelessly ripped of of them. You can find them [here](https://github.com/Birdthulu/FPM-Installer)
 
 The entire FasterMelee team, without their installer as a base, this would probably not have been written.
 
